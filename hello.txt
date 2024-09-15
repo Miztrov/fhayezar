@@ -1,1 +1,331 @@
-"Hello World" 
+import requests
+import json
+import base64
+import uuid
+import time
+from datetime import datetime
+import os
+import threading
+
+# Utility functions
+def get_ids_tokens(file_path):
+    with open(file_path, 'r') as file:
+        return [line.strip() for line in file]
+
+def linktradio(post_link):
+    # Assuming this function extracts post ID from a link
+    return post_link.split('/')[-1]  # Placeholder implementation
+
+def get_user_name():
+    return "User"  # Placeholder implementation
+
+# ────────────────[1• Main Menu]─────────────────
+
+def menu():
+    print("Good afternoon, Greio!")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("   「1」 START                「6」 FOLLOW")
+    print("   「2」 REACT                「7」 COMMENT")
+    print("   「3」 CREATE PAGE          「8」 SHARE")
+    print("   「4」 MASS REPORT          「9」 POST BY GROUP")
+    print("   「5」 SPAM CHAT            「10」 COOKIE GETTER")
+    print("   「0」 EXIT                 「11」 RESET")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    
+    choice = input('   Choose »  ')
+    
+    if choice == '1':
+        extract_method()
+    elif choice == '2':
+        # REACT
+        QuickReact()
+    elif choice == '3':
+        # CREATE PAGE
+        pass
+    elif choice == '4':
+        # MASS REPORT
+        pass
+    elif choice == '5':
+        # SPAM CHAT
+        pass
+    elif choice == '6':
+        # FOLLOW
+        pass
+    elif choice == '7':
+        # COMMENT
+        comment_on_facebook_post()
+    elif choice == '8':
+        # SHARE
+        AutomaticSharing()
+    elif choice == '9':
+        # POST BY GROUP
+        pass
+    elif choice == '10':
+        # COOKIE GETTER
+        pass
+    elif choice == '11':
+        # RESET
+        reset()
+    elif choice == '0':
+        # EXIT
+        print("Exiting...")
+        exit()
+    else:
+        print('Invalid option.')
+
+def extract_method():
+    print("Please choose how you want to Extract.")
+    print("     「1」 Manual through input")
+    print("     「2」 Manual through File")
+    print("     「3」 Automatic through option")
+    
+    choice = input('   Choose »  ')
+    
+    if choice == '1':
+        handle_profile_or_page()
+    elif choice == '2':
+        # Handle file input
+        pass
+    elif choice == '3':
+        # Handle automatic option
+        pass
+    else:
+        print('Invalid option.')
+
+def handle_profile_or_page():
+    entity_type = input('Input y or leave blank if it’s a user account. If it’s a page then input n (y/Y/yes/Yes or n/N/no/No): ').lower()
+    
+    if entity_type in ['y', 'yes', '']:
+        # Handle User Account
+        print('Handling User Account...')
+        # Add logic for user account operations
+    else:
+        # Handle Facebook Page
+        print('Handling Facebook Page...')
+        # Add logic for Facebook page operations
+
+# ────────────────[2• React]─────────────────
+
+def Reaction(actor_id: str, post_id: str, react: str, token: str):
+    rui = requests.Session()
+    var = {
+        "input": {
+            "feedback_referrer": "native_newsfeed",
+            "tracking": [None],
+            "feedback_id": str(base64.b64encode(('feedback:{}'.format(post_id)).encode('utf-8')).decode('utf-8')),
+            "client_mutation_id": str(uuid.uuid4()),
+            "nectar_module": "newsfeed_ufi",
+            "feedback_source": "native_newsfeed",
+            "attribution_id_v2": "NewsFeedFragment,native_newsfeed,cold_start,1710331848.276,264071715,4748854339,,",
+            "feedback_reaction_id": react,
+            "actor_id": actor_id,
+            "action_timestamp": str(time.time())[:10]
+        }
+    }
+    data = {
+        'access_token': token,
+        'method': 'post',
+        'pretty': False,
+        'format': 'json',
+        'server_timestamps': True,
+        'locale': 'id_ID',
+        'fb_api_req_friendly_name': 'ViewerReactionsMutation',
+        'fb_api_caller_class': 'graphservice',
+        'client_doc_id': '2857784093518205785115255697',
+        'variables': json.dumps(var),
+        'fb_api_analytics_tags': ["GraphServices"],
+        'client_trace_id': str(uuid.uuid4())
+    }
+    pos = rui.post('https://graph.facebook.com/graphql', data=data).json()
+    try:
+        if react in str(pos):
+            print(f"Success: Reacted with {actor_id} to {post_id}")
+        else:
+            print(f"Failed: Reacted with {actor_id} to {post_id}")
+    except Exception:
+        print('An error occurred.')
+
+def choose_reaction():
+    print("Please choose the reaction you want to use.\n")
+    print("     「1」 Like")
+    print("     「2」 Love")
+    print("     「3」 Haha")
+    print("     「4」 Wow")
+    print("     「5」 Care")
+    print("     「6」 Sad")
+    print("     「7」 Angry")
+
+    rec = input('   Choose »  ')
+    reactions = {
+        '1': '1635855486666999',  # Like
+        '2': '1678524932434102',  # Love
+        '3': '115940658764963',   # Haha
+        '4': '478547315650144',   # Wow
+        '5': '613557422527858',   # Care
+        '6': '908563459236466',   # Sad
+        '7': '444813342392137'    # Angry
+    }
+    return reactions.get(rec, None)
+
+def QuickReact():
+    actor_ids = get_ids_tokens('/sdcard/Aqua/tokaid.txt')
+    tokens = get_ids_tokens('/sdcard/Aqua/toka.txt')
+    post_link = input('Enter the Facebook post link: ')
+    post_id = linktradio(post_link)
+
+    react = choose_reaction()
+    if react:
+        for actor_id, token in zip(actor_ids, tokens):
+            Reaction(actor_id=actor_id, post_id=post_id, react=react, token=token)
+
+# ────────────────[3• Create Pages]─────────────────
+
+# The code here is for creating pages, which seems to be working fine.
+# You can integrate this functionality based on how you want to manage pages.
+
+# ────────────────[5• Comment]─────────────────
+
+def has_commented(post_id, access_token, user_id):
+    try:
+        url = f'https://graph.facebook.com/v18.0/{user_id}_{post_id}/comments'
+        params = {'access_token': access_token}
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        comments = response.json().get('data', [])
+        
+        for comment in comments:
+            if comment.get('from', {}).get('id') == user_id:
+                return True
+    except requests.exceptions.RequestException as error:
+        print(f"Failed to comment on {post_id}: {error}")
+    return False
+
+def comment_on_facebook_post():
+    user_ids = get_ids_tokens('/sdcard/Aqua/tokaid.txt')
+    access_tokens = get_ids_tokens('/sdcard/Aqua/toka.txt')
+    current_time = datetime.now()
+    user_name = get_user_name()
+    post_link = input('Enter the Facebook post link: ')
+    post_id = linktradio(post_link)
+    comment_text = input('Enter the comment text (or leave blank for auto comment): ')
+    num_comments = int(input('Enter the number of comments to make: '))
+
+    if not comment_text:
+        current_time = datetime.now().strftime("%I:%M %p")
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        comment_text = f'Time:「{current_time}」「{current_date}」\n-「Auto comment by {user_name}」'
+
+    comments_count = 0
+    user_count = len(user_ids)
+
+    for _ in range(num_comments):
+        for i in range(user_count):
+            user_id = user_ids[i]
+            access_token = access_tokens[i]
+
+            try:
+                if not has_commented(post_id, access_token, user_id):
+                    url = f'https://graph.facebook.com/v19.0/{user_id}_{post_id}/comments'
+                    params = {'access_token': access_token, 'message': comment_text}
+                    response = requests.post(url, params=params)
+                    
+                    if response.status_code == 200:
+                        comments_count += 1
+                        print(f"Success: Commented on {post_id}")
+                        if comments_count >= num_comments:
+                            print(f"Successfully commented {num_comments} times.")
+                            return
+                    else:
+                        print(f"Failed: Commented on {post_id}")
+            except requests.exceptions.RequestException as error:
+                print(f"Failed to comment on {post_id}: {error}")
+
+# ────────────────[6• Share]─────────────────
+
+def AutomaticSharing():
+    access_token = input('Enter the access token: ')
+    share_url = input('Enter the Facebook post link: ')
+    share_count = 22200
+    time_interval = 1.5
+    delete_after = 60 * 60
+
+    shared_count = 0
+    timer = None
+
+    headers = {
+        'authority': 'graph.facebook.com',
+        'cache-control': 'max-age=0',
+        'sec-ch-ua-mobile': '?0',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'
+    }
+
+    def share_post():
+        nonlocal shared_count, timer
+
+        try:
+            response = requests.post(
+                f'https://graph.facebook.com/me/feed?access_token={access_token}&fields=id&limit=1&published=0',
+                json={
+                    'link': share_url,
+                    'privacy': {'value': 'SELF'},
+                    'no_story': True,
+                },
+                headers=headers
+            )
+
+            shared_count += 1
+            post_id = response.json().get('id')
+            print(f'Success: Shared post {shared_count} times. ID: {post_id or "Unknown"}')
+
+            if shared_count == share_count:
+                timer.cancel()
+                print('Finished sharing posts.')
+
+                if post_id:
+                    threading.Timer(delete_after, delete_post, args=(post_id,)).start()
+
+        except requests.exceptions.RequestException as error:
+            print(f'Failed to share post: {error}')
+
+    def delete_post(post_id):
+        try:
+            requests.delete(f'https://graph.facebook.com/{post_id}?access_token={access_token}')
+            print(f'Post deleted: {post_id}')
+        except requests.exceptions.RequestException as error:
+            print(f'Failed to delete post: {error}')
+
+    def start_sharing():
+        nonlocal timer
+        timer = threading.Timer(time_interval, share_post)
+        timer.start()
+
+    for _ in range(share_count):
+        start_sharing()
+        time.sleep(time_interval)
+
+    time.sleep(share_count * time_interval)
+    if timer:
+        timer.cancel()
+        print('Loop stopped.')
+
+# ────────────────[7• Reset]─────────────────
+
+def reset():
+    folder_name = "Aqua"
+    file_names = ["toka.txt", "tokaid.txt", "tokp.txt", "tokpid.txt", "cok.txt", "cokid.txt"]
+    
+    if os.path.exists(folder_name):
+        for root, dirs, files in os.walk(folder_name, topdown=False):
+            for name in files:
+                file_path = os.path.join(root, name)
+                os.remove(file_path)
+            for name in dirs:
+                dir_path = os.path.join(root, name)
+                os.rmdir(dir_path)
+        os.rmdir(folder_name)
+        print("Successfully Reset.")
+    else:
+        print("Failed to reset.")
+
+menu()
+
